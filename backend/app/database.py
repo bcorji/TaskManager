@@ -13,5 +13,5 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 def create_tables():
-    from .models import User, Project, Task
+    from models import User, Project, Task
     Base.metadata.create_all(bind=engine)
