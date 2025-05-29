@@ -3,9 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Sign Up - Task Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Optional: Custom styles for a subtle background pattern */
+        .pattern-bg {
+            background-image: linear-gradient(45deg, #f9fafb 25%, transparent 25%), linear-gradient(-45deg, #f9fafb 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f9fafb 75%), linear-gradient(-45deg, transparent 75%, #f9fafb 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
 </head>
-<body>
-    
+<body class="bg-gray-100 pattern-bg min-h-screen flex items-center justify-center p-4">
+    <!-- Back to Home Button -->
+    <a href="../index.html" class="fixed top-4 left-4 flex items-center gap-2 text-green-600 hover:text-green-500 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+        </svg>
+        <span class="font-medium">Back to Home</span>
+    </a>
+
+    <div class="flex flex-col md:flex-row bg-white shadow-2xl rounded-xl overflow-hidden w-full max-w-4xl transition-all duration-300 ease-in-out transform hover:scale-[1.01] hover:shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)]">
+
+        <div class="hidden md:block md:w-1/2 bg-indigo-600">
+            <img src="https://placehold.co/600x800/34d399/ffffff?text=Organize+Your+Life&font=inter"
+                 alt="Task management illustration"
+                 class="object-cover w-full h-full"
+                 onerror="this.onerror=null; this.src='https://placehold.co/600x800/cccccc/333333?text=Image+Not+Found&font=inter';">
+        </div>
+
+        <div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10">
+            <div class="w-full max-w-md space-y-6">
+                <div>
+                    <div class="flex justify-center text-green-500">
+                        <svg class="h-12 w-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="mt-4 text-center text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
+                        Create your account
+                    </h2>
+                    <p class="mt-2 text-center text-sm text-gray-600">
+                        Get started with managing your tasks efficiently.
+                    </p>
+                </div>
+
+                <form class="mt-6 space-y-5" id="signupForm" action="#" method="POST">
+                    <div>
+                        <label for="full-name" class="sr-only">Full Name</label>
+                        <input id="full-name" name="full-name" type="text" autocomplete="name" required
+                            class="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
+                            placeholder="Full Name">
+                    </div>
+
+                    <div>
+                        <label for="email-address" class="sr-only">Email address</label>
+                        <input id="email-address" name="email" type="email" autocomplete="email" required
+                            class="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
+                            placeholder="Email address">
+                    </div>
+
+                    <div>
+                        <label for="password" class="sr-only">Password</label>
+                        <input id="password" name="password" type="password" autocomplete="new-password" required
+                            class="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
+                            placeholder="Password">
+                        </div>
+
+                    <div>
+                        <label for="confirm-password" class="sr-only">Confirm Password</label>
+                        <input id="confirm-password" name="confirm-password" type="password" autocomplete="new-password" required
+                            class="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-3 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
+                            placeholder="Confirm Password">
+                    </div>
+
+                    <div class="flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="terms-conditions" name="terms-conditions" type="checkbox" required
+                                class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="terms-conditions" class="font-medium text-gray-700">I agree to the
+                                <a href="#" class="font-medium text-green-600 hover:text-green-500">Terms and Conditions</a>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit"
+                            class="group relative flex w-full justify-center rounded-md border border-transparent bg-green-600 py-3 px-4 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Already have an account?
+                    <a href="./login.html" class="font-medium text-green-600 hover:text-green-500">
+                        Sign In
+                    </a>
+                </p>
+
+                <div id="message-box" class="hidden mt-4 p-3 rounded-md">
+                    <p id="message-text" class="text-sm"></p>
+                    <button id="close-message" class="mt-1 text-xs font-medium hover:underline">Dismiss</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const signupForm = document.getElementById('signupForm');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const termsCheckbox = document.getElementById('terms-conditions');
+
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const closeMessageButton = document.getElementById('close-message');
+
+        signupForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent actual form submission for this demo
+
+            const fullName = document.getElementById('full-name').value;
+            const email = document.getElementById('email-address').value;
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            // Basic Validations
+            if (!fullName || !email || !password || !confirmPassword) {
+                showMessage('Please fill in all fields.', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match. Please try again.', 'error');
+                confirmPasswordInput.focus();
+                return;
+            }
+
+            if (password.length < 8) {
+                showMessage('Password must be at least 8 characters long.', 'error');
+                passwordInput.focus();
+                return;
+            }
+
+            if (!termsCheckbox.checked) {
+                showMessage('You must agree to the Terms and Conditions.', 'error');
+                return;
+            }
+
+            // Simulate a successful registration attempt
+            console.log('Attempting registration with:', { fullName, email, password });
+            showMessage('Registration successful! Welcome aboard.', 'success');
+            signupForm.reset(); // Clear the form
+            // In a real application, you would send this data to a server
+        });
+
+        function showMessage(message, type = 'info') {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+            // Reset classes for message box styling
+            messageBox.className = 'mt-4 p-3 rounded-md '; // Base classes
+            closeMessageButton.className = 'mt-1 text-xs font-medium hover:underline '; // Base classes for button
+
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-50', 'text-red-700', 'border', 'border-red-200');
+                closeMessageButton.classList.add('text-red-800', 'hover:text-red-700');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-50', 'text-green-700', 'border', 'border-green-200');
+                closeMessageButton.classList.add('text-green-800', 'hover:text-green-700');
+            } else { // 'info' or default
+                messageBox.classList.add('bg-blue-50', 'text-blue-700', 'border', 'border-blue-200');
+                closeMessageButton.classList.add('text-blue-800', 'hover:text-blue-700');
+            }
+        }
+
+        closeMessageButton.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+    </script>
 </body>
 </html>
