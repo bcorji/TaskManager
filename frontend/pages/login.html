@@ -17,6 +17,8 @@
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
     </style>
+    <script src="../js/services/api.js" defer></script>
+    <script src="../js/services/auth.js" defer></script>
 </head>
 <body class="bg-gray-100 pattern-bg min-h-screen flex items-center justify-center">
     <!-- Back to Home Button -->
@@ -55,7 +57,7 @@
                     </p>
                 </div>
 
-                <form class="mt-8 space-y-6" action="#" method="POST">
+                <form id="loginForm" class="mt-8 space-y-6">
                     <input type="hidden" name="remember" value="true">
                     <div class="rounded-md shadow-sm -space-y-px">
                         <div>
@@ -113,53 +115,42 @@
     </div>
 
     <script>
-        // Basic form submission handling (can be expanded)
-        const form = document.querySelector('form');
+        // Check if already authenticated
+        if (AuthService.redirectIfAuthenticated()) {
+            // User is already logged in, AuthService will handle the redirect
+            throw new Error('Already authenticated');
+        }
+
+        const loginForm = document.getElementById('loginForm');
         const messageBox = document.getElementById('message-box');
-        const messageText = document.getElementById('message-text');
-        const closeMessageButton = document.getElementById('close-message');
 
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent actual form submission for this demo
-
-            // Example: Basic validation (can be more complex)
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
             const email = document.getElementById('email-address').value;
             const password = document.getElementById('password').value;
 
-            if (!email || !password) {
-                showMessage('Please fill in all fields.', 'error');
-                return;
+            try {
+                await ApiService.login(email, password);
+                window.location.href = './dashboard.html';
+            } catch (error) {
+                showMessage('Invalid email or password', 'error');
             }
-
-            // Simulate a login attempt
-            console.log('Attempting login with:', { email, password });
-            showMessage('Login button clicked! (Check console for details)', 'info');
-            // In a real application, you would send this data to a server
-            // and handle the response (success, error, etc.)
         });
 
-        function showMessage(message, type = 'info') {
+        function showMessage(message, type = 'error') {
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            
             messageText.textContent = message;
             messageBox.classList.remove('hidden');
-            // Reset classes for message box styling
-            messageBox.className = 'mt-4 p-4 rounded-md border ';
-
-
+            
             if (type === 'error') {
-                messageBox.classList.add('bg-red-50', 'text-red-700', 'border-red-200');
-            } else if (type === 'success') {
-                messageBox.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
-            } else { // 'info' or default
-                messageBox.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200');
+                messageBox.className = 'mt-4 p-4 rounded-md bg-red-50 text-red-700 border border-red-200';
+            } else {
+                messageBox.className = 'mt-4 p-4 rounded-md bg-green-50 text-green-700 border border-green-200';
             }
         }
-
-        closeMessageButton.addEventListener('click', () => {
-            messageBox.classList.add('hidden');
-        });
-
-        // Example of how to show an error message (e.g., on failed login from server)
-        // showMessage('Invalid username or password.', 'error');
     </script>
 </body>
 </html>
