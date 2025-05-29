@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tasks - Task Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="../js/services/api.js"></script>
+    <script src="../js/services/auth.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .task-column {
+            min-height: 300px;
+        }
+        .task-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .task-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .task-list::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+        .task-list::-webkit-scrollbar-track {
+            background-color: #e2e8f0;
+        }
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        .modal-content {
+            transition: all 0.25s ease;
+        }
+        .modal.opacity-0 {
+            pointer-events: none;
+        }
+        .modal .modal-content.scale-95 {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container" class="flex flex-col min-h-screen">
+        <nav class="bg-white shadow-md sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 flex items-center text-green-600">
+                            <svg class="h-8 w-auto mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span class="font-bold text-xl">TaskMaster</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button id="open-task-modal-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center">
+                            <i class="fas fa-plus mr-2"></i> New Task
+                        </button>
+                        <div class="relative">
+                            <button id="user-menu-button" class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition duration-150 ease-in-out">
+                                <img class="h-8 w-8 rounded-full object-cover" src="https://placehold.co/100x100/e2e8f0/cbd5e1?text=User" alt="User avatar">
+                            </button>
+                            <div id="user-menu" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-50">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                                <a href="#" id="logout-button" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500">User ID: <span id="user-id-display"></span></p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="flex-grow p-4 sm:p-6 lg:p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-200 p-4 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-list-ul mr-2 text-red-500"></i> To Do
+                        <span id="todo-count" class="ml-auto text-sm bg-red-500 text-white rounded-full px-2 py-0.5">0</span>
+                    </h2>
+                    <div id="todo-tasks" class="task-column space-y-3 task-list overflow-y-auto max-h-[calc(100vh-200px)]">
+                    </div>
+                </div>
+
+                <div class="bg-gray-200 p-4 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-spinner fa-spin mr-2 text-yellow-500"></i> In Progress
+                        <span id="inprogress-count" class="ml-auto text-sm bg-yellow-500 text-white rounded-full px-2 py-0.5">0</span>
+                    </h2>
+                    <div id="inprogress-tasks" class="task-column space-y-3 task-list overflow-y-auto max-h-[calc(100vh-200px)]">
+                    </div>
+                </div>
+
+                <div class="bg-gray-200 p-4 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-check-circle mr-2 text-green-500"></i> Completed
+                        <span id="completed-count" class="ml-auto text-sm bg-green-500 text-white rounded-full px-2 py-0.5">0</span>
+                    </h2>
+                    <div id="completed-tasks" class="task-column space-y-3 task-list overflow-y-auto max-h-[calc(100vh-200px)]">
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="task-modal" class="modal fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center p-4 opacity-0 pointer-events-none z-50">
+            <div class="modal-content bg-white rounded-lg shadow-xl p-6 w-full max-w-lg transform scale-95">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modal-title" class="text-2xl font-semibold text-gray-800">Add New Task</h3>
+                    <button id="close-task-modal-btn" class="text-gray-500 hover:text-gray-700" aria-label="Close modal">
+                        <span class="sr-only">Close</span>
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                </div>
+                <form id="task-form" class="space-y-4">
+                    <input type="hidden" id="task-id">
+                    <div>
+                        <label for="task-title" class="block text-sm font-medium text-gray-700">Title</label>
+                        <input type="text" id="task-title" name="title" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2">
+                    </div>
+                    <div>
+                        <label for="task-description" class="block text-sm font-medium text-gray-700">Description (Optional)</label>
+                        <textarea id="task-description" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2"></textarea>
+                    </div>
+                    <div>
+                        <label for="task-due-date" class="block text-sm font-medium text-gray-700">Due Date</label>
+                        <input type="date" id="task-due-date" name="dueDate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2">
+                    </div>
+                    <div>
+                        <label for="task-priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                        <select id="task-priority" name="priority" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="task-status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select id="task-status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2">
+                            <option value="pending">To Do</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-2">
+                        <button type="button" id="cancel-task-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition duration-150 ease-in-out">Cancel</button>
+                        <button type="submit" id="save-task-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out">Save Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="global-message-box" class="hidden fixed bottom-4 right-4 p-4 rounded-md shadow-lg max-w-sm z-[100]">
+            <div class="flex items-start">
+                <p id="global-message-text" class="text-sm font-medium mr-2"></p>
+                <button id="close-global-message-btn" class="ml-auto -mx-1.5 -my-1.5 rounded-lg p-1.5 inline-flex h-8 w-8">
+                    <span class="sr-only">Dismiss</span>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // UI Elements
+        const openTaskModalBtn = document.getElementById('open-task-modal-btn');
+        const closeTaskModalBtn = document.getElementById('close-task-modal-btn');
+        const cancelTaskBtn = document.getElementById('cancel-task-btn');
+        const taskModal = document.getElementById('task-modal');
+        const taskForm = document.getElementById('task-form');
+        const modalTitle = document.getElementById('modal-title');
+        const userIdDisplay = document.getElementById('user-id-display');
+        const logoutButton = document.getElementById('logout-button');
+        const todoTasksContainer = document.getElementById('todo-tasks');
+        const inprogressTasksContainer = document.getElementById('inprogress-tasks');
+        const completedTasksContainer = document.getElementById('completed-tasks');
+        const todoCountEl = document.getElementById('todo-count');
+        const inprogressCountEl = document.getElementById('inprogress-count');
+        const completedCountEl = document.getElementById('completed-count');
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userMenu = document.getElementById('user-menu');
+        const globalMessageBox = document.getElementById('global-message-box');
+        const globalMessageText = document.getElementById('global-message-text');
+        const closeGlobalMessageBtn = document.getElementById('close-global-message-btn');
+
+        // Check authentication
+        if (!localStorage.getItem('token')) {
+            window.location.href = './login.html';
+        }
+
+        // Load user info
+        async function loadUserInfo() {
+            try {
+                const user = await ApiService.getCurrentUser();
+                userIdDisplay.textContent = user.email;
+            } catch (error) {
+                console.error('Error loading user info:', error);
+                window.location.href = './login.html';
+            }
+        }
+
+        // Modal Handling
+        function openModal(task = null) {
+            taskForm.reset();
+            if (task) {
+                modalTitle.textContent = 'Edit Task';
+                document.getElementById('task-id').value = task.id;
+                document.getElementById('task-title').value = task.title;
+                document.getElementById('task-description').value = task.description || '';
+                document.getElementById('task-due-date').value = task.due_date || '';
+                document.getElementById('task-priority').value = task.priority || 'medium';
+                document.getElementById('task-status').value = task.status || 'pending';
+            } else {
+                modalTitle.textContent = 'Add New Task';
+                document.getElementById('task-id').value = '';
+                document.getElementById('task-status').value = 'pending';
+            }
+            taskModal.classList.remove('opacity-0', 'pointer-events-none');
+            taskModal.querySelector('.modal-content').classList.remove('scale-95');
+        }
+
+        function closeModal() {
+            taskModal.classList.add('opacity-0');
+            taskModal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => {
+                taskModal.classList.add('pointer-events-none');
+            }, 250);
+        }
+
+        // Task Management
+        async function loadTasks() {
+            try {
+                const tasks = await ApiService.getTasks();
+                renderTasks(tasks);
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                showGlobalMessage('Error loading tasks', 'error');
+            }
+        }
+
+        function renderTasks(tasks) {
+            clearTaskColumns();
+            let todoCount = 0, inprogressCount = 0, completedCount = 0;
+
+            tasks.forEach(task => {
+                const taskElement = renderTask(task);
+                if (task.status === 'pending') {
+                    todoTasksContainer.appendChild(taskElement);
+                    todoCount++;
+                } else if (task.status === 'in_progress') {
+                    inprogressTasksContainer.appendChild(taskElement);
+                    inprogressCount++;
+                } else if (task.status === 'completed') {
+                    completedTasksContainer.appendChild(taskElement);
+                    completedCount++;
+                }
+            });
+
+            updateTaskCounts(todoCount, inprogressCount, completedCount);
+        }
+
+        function renderTask(task) {
+            const taskCard = document.createElement('div');
+            taskCard.className = `task-card bg-white p-3 rounded-lg shadow-sm border-l-4 ${getPriorityBorderColor(task.priority)}`;
+            taskCard.setAttribute('data-id', task.id);
+
+            let dueDateHtml = '';
+            if (task.due_date) {
+                const date = new Date(task.due_date);
+                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                dueDateHtml = `<span class="text-xs text-gray-500"><i class="fas fa-calendar-alt mr-1"></i>Due: ${formattedDate}</span>`;
+            }
+
+            let priorityHtml = `<span class="text-xs font-semibold px-2 py-0.5 rounded-full ${getPriorityColor(task.priority)}">${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</span>`;
+
+            taskCard.innerHTML = `
+                <div class="flex justify-between items-start mb-1">
+                    <h4 class="font-semibold text-gray-800">${task.title}</h4>
+                    <div class="relative group">
+                        <button class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div class="absolute right-0 mt-1 w-32 bg-white rounded-md shadow-lg py-1 z-10 hidden group-focus-within:block hover:block">
+                            <a href="#" class="edit-task-btn block px-3 py-1 text-sm text-gray-700 hover:bg-gray-100" data-id="${task.id}">Edit</a>
+                            <a href="#" class="delete-task-btn block px-3 py-1 text-sm text-red-600 hover:bg-gray-100" data-id="${task.id}">Delete</a>
+                            <hr class="my-1">
+                            ${task.status !== 'pending' ? `<a href="#" class="move-task-btn block px-3 py-1 text-sm text-gray-700 hover:bg-gray-100" data-id="${task.id}" data-status="pending">To Do</a>` : ''}
+                            ${task.status !== 'in_progress' ? `<a href="#" class="move-task-btn block px-3 py-1 text-sm text-gray-700 hover:bg-gray-100" data-id="${task.id}" data-status="in_progress">In Progress</a>` : ''}
+                            ${task.status !== 'completed' ? `<a href="#" class="move-task-btn block px-3 py-1 text-sm text-gray-700 hover:bg-gray-100" data-id="${task.id}" data-status="completed">Completed</a>` : ''}
+                        </div>
+                    </div>
+                </div>
+                ${task.description ? `<p class="text-sm text-gray-600 mb-2">${task.description.substring(0, 100)}${task.description.length > 100 ? '...' : ''}</p>` : ''}
+                <div class="flex justify-between items-center text-xs">
+                    ${dueDateHtml}
+                    ${priorityHtml}
+                </div>
+            `;
+
+            // Add event listeners
+            taskCard.querySelector('.edit-task-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                openModal(task);
+            });
+
+            taskCard.querySelector('.delete-task-btn').addEventListener('click', async (e) => {
+                e.preventDefault();
+                if (confirm('Are you sure you want to delete this task?')) {
+                    try {
+                        await ApiService.deleteTask(task.id);
+                        showGlobalMessage('Task deleted successfully', 'success');
+                        loadTasks();
+                    } catch (error) {
+                        console.error('Error deleting task:', error);
+                        showGlobalMessage('Error deleting task', 'error');
+                    }
+                }
+            });
+
+            taskCard.querySelectorAll('.move-task-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    try {
+                        await ApiService.updateTask(task.id, {
+                            ...task,
+                            status: e.target.dataset.status
+                        });
+                        showGlobalMessage('Task status updated', 'success');
+                        loadTasks();
+                    } catch (error) {
+                        console.error('Error updating task:', error);
+                        showGlobalMessage('Error updating task status', 'error');
+                    }
+                });
+            });
+
+            return taskCard;
+        }
+
+        function clearTaskColumns() {
+            todoTasksContainer.innerHTML = '';
+            inprogressTasksContainer.innerHTML = '';
+            completedTasksContainer.innerHTML = '';
+        }
+
+        function updateTaskCounts(todo, inprogress, completed) {
+            todoCountEl.textContent = todo;
+            inprogressCountEl.textContent = inprogress;
+            completedCountEl.textContent = completed;
+        }
+
+        function getPriorityBorderColor(priority) {
+            if (priority === 'high') return 'border-red-500';
+            if (priority === 'medium') return 'border-yellow-500';
+            return 'border-green-500';
+        }
+
+        function getPriorityColor(priority) {
+            if (priority === 'high') return 'bg-red-100 text-red-700';
+            if (priority === 'medium') return 'bg-yellow-100 text-yellow-700';
+            return 'bg-green-100 text-green-700';
+        }
+
+        // Form submission
+        taskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const taskId = document.getElementById('task-id').value;
+            const taskData = {
+                title: document.getElementById('task-title').value,
+                description: document.getElementById('task-description').value,
+                due_date: document.getElementById('task-due-date').value,
+                priority: document.getElementById('task-priority').value,
+                status: document.getElementById('task-status').value
+            };
+
+            try {
+                if (taskId) {
+                    await ApiService.updateTask(taskId, taskData);
+                    showGlobalMessage('Task updated successfully', 'success');
+                } else {
+                    await ApiService.createTask(taskData);
+                    showGlobalMessage('Task created successfully', 'success');
+                }
+                closeModal();
+                loadTasks();
+            } catch (error) {
+                console.error('Error saving task:', error);
+                showGlobalMessage('Error saving task', 'error');
+            }
+        });
+
+        // User menu
+        userMenuButton.addEventListener('click', () => {
+            userMenu.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!userMenuButton.contains(event.target) && !userMenu.contains(event.target)) {
+                userMenu.classList.add('hidden');
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = './login.html';
+        });
+
+        // Message box
+        function showGlobalMessage(message, type = 'info', duration = 4000) {
+            globalMessageText.textContent = message;
+            globalMessageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
+            closeGlobalMessageBtn.classList.remove('text-red-500', 'hover:text-red-400', 'text-green-500', 'hover:text-green-400', 'text-blue-500', 'hover:text-blue-400');
+
+            if (type === 'error') {
+                globalMessageBox.classList.add('bg-red-100', 'text-red-700');
+                closeGlobalMessageBtn.classList.add('text-red-500', 'hover:text-red-400');
+            } else if (type === 'success') {
+                globalMessageBox.classList.add('bg-green-100', 'text-green-700');
+                closeGlobalMessageBtn.classList.add('text-green-500', 'hover:text-green-400');
+            } else {
+                globalMessageBox.classList.add('bg-blue-100', 'text-blue-700');
+                closeGlobalMessageBtn.classList.add('text-blue-500', 'hover:text-blue-400');
+            }
+            globalMessageBox.classList.remove('opacity-0');
+
+            setTimeout(() => {
+                globalMessageBox.classList.add('opacity-0');
+                setTimeout(() => globalMessageBox.classList.add('hidden'), 300);
+            }, duration);
+        }
+
+        closeGlobalMessageBtn.addEventListener('click', () => {
+            globalMessageBox.classList.add('opacity-0');
+            setTimeout(() => globalMessageBox.classList.add('hidden'), 300);
+        });
+
+        // Modal event listeners
+        openTaskModalBtn.addEventListener('click', () => openModal());
+        closeTaskModalBtn.addEventListener('click', closeModal);
+        cancelTaskBtn.addEventListener('click', closeModal);
+        taskModal.addEventListener('click', (event) => {
+            if (event.target === taskModal) {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        loadUserInfo();
+        loadTasks();
+    </script>
+</body>
+</html>
