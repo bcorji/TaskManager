@@ -1,1 +1,56 @@
-Generic single-database configuration.
+# Database Migrations with Alembic
+
+This directory contains database migrations for the TaskManager application.
+
+## Structure
+
+- `versions/`: Contains all migration scripts
+- `env.py`: Alembic environment configuration
+- `script.py.mako`: Template for new migration files
+
+## Usage
+
+### Create a New Migration
+
+```powershell
+alembic revision -m "description_of_changes"
+```
+
+### Run Migrations
+
+Apply all pending migrations:
+```powershell
+alembic upgrade head
+```
+
+Revert last migration:
+```powershell
+alembic downgrade -1
+```
+
+### Check Migration Status
+
+View current migration state:
+```powershell
+alembic current
+```
+
+View migration history:
+```powershell
+alembic history
+```
+
+## Migration Files
+
+Each migration file in `versions/` contains:
+- Unique revision ID
+- Dependencies (previous migrations)
+- Upgrade operations (apply changes)
+- Downgrade operations (revert changes)
+
+## Important Notes
+
+1. Always test migrations on a development database first
+2. Back up production database before applying migrations
+3. Review migration files before applying them
+4. Keep migrations small and focused
