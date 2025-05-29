@@ -9,7 +9,7 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 DATABASE_URL='postgresql://postgres:bcorji@localhost:5432/taskmanager'
 
-print("Database URL:", DATABASE_URL)  # for debugging purposes
+# print("Database URL:", DATABASE_URL)  # for debugging purposes
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set.")
 
