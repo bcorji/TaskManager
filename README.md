@@ -28,6 +28,9 @@ A modern task management application built with FastAPI and a responsive web fro
 - JavaScript (ES6+)
 - Fetch API (HTTP requests)
 
+You can view on github pages: 
+bcorji.github.io/TaskManager/frontend
+
 ## Getting Started
 
 ### Prerequisites
